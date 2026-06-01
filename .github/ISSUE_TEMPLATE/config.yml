@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Feedback & ideas
+    url: https://github.com/speakman/switch-controller-tester/discussions
+    about: Share feature ideas, questions, or general feedback (not bug reports).

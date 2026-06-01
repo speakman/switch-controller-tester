@@ -1,0 +1,34 @@
+name: Bug report
+description: Something didn't work in the Switch Controller Tester
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! If you came from the in-app **Report a bug** link,
+        the *Environment* field below is already filled in — please leave it.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead? Steps to reproduce help a lot.
+    validations:
+      required: true
+  - type: input
+    id: controller
+    attributes:
+      label: Controller
+      placeholder: e.g. PowerA Enhanced Wireless (Lic Pro Controller)
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (auto-filled)
+      description: Collected automatically by the app — please don't edit.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Sanity checks
+      options:
+        - label: I'm on a Chromium desktop browser (Chrome, Edge, Opera, Brave or Arc)
+        - label: The page is served over HTTPS or http://localhost

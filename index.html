@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Switch Controller Tester — WebHID Diagnostics</title>
+  <meta name="description" content="Test every input on a Nintendo Switch controller in the browser via WebHID, with extensive stick-drift diagnostics.">
+  <meta name="theme-color" content="#070809">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://api.github.com; base-uri 'self'; object-src 'none'">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0f14'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2346d6ff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-grain" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header class="hero reveal" style="--d:0">
+      <div class="hero-row">
+        <div class="brand">
+          <span class="mark" aria-hidden="true"><span class="mark-dot"></span></span>
+          <div class="brand-text">
+            <p class="kicker" data-i18n="kicker">WebHID · Controller Diagnostic</p>
+            <h1>Switch Controller&nbsp;Tester</h1>
+          </div>
+        </div>
+        <div class="hero-aside">
+          <div class="aside-row">
+            <a class="gh-star" href="https://github.com/speakman/switch-controller-tester" target="_blank" rel="noopener" title="Star on GitHub">
+              <svg class="gh-logo" viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 3.96c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+              <span data-i18n="star_cta">Star on GitHub</span>
+              <span id="star-count" class="star-count" aria-hidden="true"></span>
+            </a>
+            <div class="lang" id="lang-switch" role="group" aria-label="Language">
+              <button type="button" data-lang="en">EN</button>
+              <button type="button" data-lang="sv">SV</button>
+            </div>
+          </div>
+          <div id="conn-led" class="led" title="Connection status">
+            <span class="dot"></span><span class="led-text" data-i18n="led_off">Not connected</span>
+          </div>
+        </div>
+      </div>
+      <p class="sub" data-i18n="sub">Test every button, the D-pad and both sticks right in your browser — with instrument-grade tools for finding stick drift. Reads the controller via WebHID, so even clones the Gamepad API can't see will work.</p>
+      <div id="support" class="support"></div>
+    </header>
+
+    <div class="toolbar reveal" style="--d:1">
+      <button id="connect" class="btn btn-primary">
+        <span class="btn-ico">⏻</span> <span data-i18n="connect">Connect controller</span>
+      </button>
+      <span id="devinfo" class="devinfo" data-i18n="no_device">No device selected.</span>
+    </div>
+
+    <main>
+      <div class="idle-hint reveal" style="--d:2">
+        <div class="idle-card">
+          <span class="idle-ico" aria-hidden="true">🎮</span>
+          <h2 data-i18n="idle_title">Connect a controller to begin</h2>
+          <p data-i18n="idle_body">Click “Connect controller” above and pick your Switch controller in the prompt. Every button lights up live, and you can run the drift tools on both sticks.</p>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2><span class="tag">01</span> <span data-i18n="p1_title">Analog sticks</span></h2>
+          <span class="legend" data-i18n="legend">🟢 clean · 🟡 small offset · 🔴 drift</span>
+        </div>
+
+        <div class="controls">
+          <div class="seg">
+            <button id="mode-fade" class="btn" data-i18n="mode_fade">Fade</button>
+            <button id="mode-persist" class="btn" data-i18n="mode_persist">Keep trail</button>
+            <button id="clear" class="btn ghost" data-i18n="clear">Clear</button>
+          </div>
+          <span class="spacer"></span>
+          <label class="sel"><span data-i18n="rest_time">Rest time</span>
+            <select id="rest-secs">
+              <option value="5">5 s</option>
+              <option value="15">15 s</option>
+              <option value="30">30 s</option>
+            </select>
+          </label>
+          <button id="rest-test" class="btn" data-i18n="rest_test">⏺ Rest test</button>
+          <button id="range-test" class="btn" data-i18n="range_test">🧭 Range test</button>
+          <button id="export-png" class="btn ghost">📷 PNG</button>
+          <button id="export-csv" class="btn ghost">⬇ CSV</button>
+        </div>
+
+        <div class="sticks">
+          <div class="stick">
+            <div class="scope-label" data-i18n="left_stick">Left stick</div>
+            <div class="scope"><canvas id="leftCanvas" class="pad"></canvas></div>
+            <pre id="leftStat" class="stat">—</pre>
+          </div>
+          <div class="stick">
+            <div class="scope-label" data-i18n="right_stick">Right stick</div>
+            <div class="scope"><canvas id="rightCanvas" class="pad"></canvas></div>
+            <pre id="rightStat" class="stat">—</pre>
+          </div>
+        </div>
+
+        <div class="hint" data-i18n="hint">Keep the controller still. Yellow box = how far the stick wandered.</div>
+        <div id="rest-result" class="result"></div>
+        <div id="range-result" class="result"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2><span class="tag">02</span> <span data-i18n="p2_title">Buttons &amp; D-pad</span></h2></div>
+        <div id="buttons-body"><p class="dim" data-i18n="connect_hint">Connect a controller to see the buttons.</p></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2><span class="tag">03</span> <span data-i18n="p3_title">Raw report</span></h2>
+          <span id="report-hz" class="badge">0 Hz</span>
+        </div>
+        <pre id="raw-hex" class="raw">—</pre>
+      </section>
+    </main>
+
+    <footer class="reveal" style="--d:5">
+      <span data-i18n="footer_req">Requires a Chromium browser (Chrome/Edge/Arc) over HTTPS or localhost.</span>
+      <nav class="foot-links">
+        <a class="foot-link" href="https://github.com/speakman/switch-controller-tester/discussions" target="_blank" rel="noopener" data-i18n="feedback_link">Feedback</a>
+        <a id="bug-link" class="foot-link" href="https://github.com/speakman/switch-controller-tester/issues/new?template=bug_report.yml" target="_blank" rel="noopener" data-i18n="bug_link">Report a bug</a>
+        <a class="foot-link" href="https://github.com/speakman/switch-controller-tester" target="_blank" rel="noopener" data-i18n="source_link">Source ↗</a>
+      </nav>
+    </footer>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

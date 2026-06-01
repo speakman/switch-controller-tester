@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Local exports
+stickdrift-*.png
+stickdrift-*.csv
+
+# Local working notes (todo + review reports) — not part of the published app
+/tasks/
